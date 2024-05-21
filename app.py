@@ -22,12 +22,7 @@ def get_product(product_id):
 
 @app.route('/product', methods=['POST'])
 def create_product():
-    data = request.get_json()
-    name = data.get('name')
-    price = data.get('price')
-    product_id = str(uuid.uuid4())
-    product = { 'name': name, 'price': price }
-    return jsonify({ 'id': product_id, **product }), 201
+    pass
 
 
 @app.route('/products/<int:product_id>', methods=['PUT'])
