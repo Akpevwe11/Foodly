@@ -1,9 +1,8 @@
 from flask.views import MethodView
-from flask import request, jsonify
 from flask_smorest import Blueprint, abort
 from db import orders
 import uuid
-
+from schemas import OrderSchema
 
 blueprint = Blueprint('orders', __name__, description='Orders API')
 

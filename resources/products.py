@@ -3,6 +3,7 @@ from flask import request, jsonify
 from flask_smorest import Blueprint, abort
 from db import products
 import uuid
+from schemas import ProductSchema
 
 
 blueprint = Blueprint('products', __name__, description='Products API')
