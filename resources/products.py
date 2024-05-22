@@ -65,6 +65,10 @@ class ProductList(MethodView):
         if 'price' not in data or not isinstance(data['price'], (int, float)):
             abort(400, message='Invalid or missing price')
 
+        for existing_product in products.values():
+            if existing_product['name'] == data['name']:
+                abort(400, message='Product already exists')
+
         name = data.get('name')
         price = data.get('price')
         product_id = str(uuid.uuid4())

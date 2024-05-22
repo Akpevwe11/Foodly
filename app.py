@@ -1,9 +1,8 @@
-from flask import Flask, jsonify, request
-from db import products
-import uuid
+from flask import Flask
 from flask_smorest import Api
 
 from resources.products import blueprint as products_blueprint
+from resources.orders import blueprint as orders_blueprint
 
 
 app = Flask(__name__)
@@ -21,6 +20,7 @@ app.config['OPENAPI_SWAGGER_UI_URL'] = 'https://cdn.jsdelivr.net/npm/swagger-ui-
 
 api = Api(app)
 api.register_blueprint(products_blueprint)
+api.register_blueprint(orders_blueprint)
 
 
 
