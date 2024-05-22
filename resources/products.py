@@ -40,9 +40,6 @@ class Product(MethodView):
             abort(404, message='Product not found')
 
 
-def post():
-    """Create a new product"""
-    abort(405)
 
 
 @blueprint.route('/products')
@@ -59,10 +56,21 @@ class ProductList(MethodView):
         """Create a new product validate before creating"""
 
         data = request.get_json()
+        if not data:
+            abort(400, message='No data provided')
+
+        if 'name' not in data or not isinstance(data['name'], str):
+            abort(400, message='Invalid or missing name')
+
+        if 'price' not in data or not isinstance(data['price'], (int, float)):
+            abort(400, message='Invalid or missing price')
+
         name = data.get('name')
         price = data.get('price')
         product_id = str(uuid.uuid4())
-        product = {'name': name, 'price': price}
-        return jsonify({'id': product_id, **product}), 201
+        product = { 'name': name, 'price': price, 'id': product_id }
+
+        return jsonify({ 'id': product_id, **product }), 201
+
 
 
