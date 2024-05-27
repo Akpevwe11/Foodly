@@ -3,7 +3,7 @@ from flask import request, jsonify
 from flask_smorest import Blueprint, abort
 from db import products
 import uuid
-from schemas import ProductSchema
+from schemas import ProductSchema, ProductUpdateSchema
 
 
 blueprint = Blueprint('products', __name__, description='Products API')
@@ -24,12 +24,16 @@ class Product(MethodView):
         products[product_id] = product
         return { 'id': product_id, **product }, 201
 
-    @blueprint.arguments(ProductSchema)
+    @blueprint.arguments(ProductUpdateSchema)
     @blueprint.response(200, 'Product successfully updated')
-    def put(self, product, product_id):
+    def put(self, product_data, product_id):
         """Update a product"""
-        products[product_id] = product
-        return products[product_id]
+        try:
+            product = product_data[product_id]
+            product |= product_data
+            return product
+        except KeyError:
+            abort(404, message='Product not found')
 
     @blueprint.response(204, 'Product successfully deleted')
     def delete(self, product_id):
@@ -53,21 +57,13 @@ class ProductList(MethodView):
 
     @blueprint.arguments(ProductSchema)
     @blueprint.response(201, 'Product successfully created')
-    def post(self, product):
+    def post(self, existing_product):
         """Create a new product validate before creating"""
 
         data = request.get_json()
-        if not data:
-            abort(400, message='No data provided')
-
-        if 'name' not in data or not isinstance(data['name'], str):
-            abort(400, message='Invalid or missing name')
-
-        if 'price' not in data or not isinstance(data['price'], (int, float)):
-            abort(400, message='Invalid or missing price')
-
         for existing_product in products.values():
-            if existing_product['name'] == data['name']:
+            if (existing_product['name'] == data['name']
+               and existing_product['id'] == data['id']):
                 abort(400, message='Product already exists')
 
         name = data.get('name')
