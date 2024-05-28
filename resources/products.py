@@ -1,9 +1,11 @@
 from flask.views import MethodView
 from flask import request, jsonify
 from flask_smorest import Blueprint, abort
-from db import products
+from db import db
 import uuid
+from sqlalchemy.exc import SQLAlchemyError
 from schemas import ProductSchema, ProductUpdateSchema
+from models import ProductModel
 
 
 blueprint = Blueprint('products', __name__, description='Products API')
@@ -60,18 +62,15 @@ class ProductList(MethodView):
     def post(self, existing_product):
         """Create a new product validate before creating"""
 
-        data = request.get_json()
-        for existing_product in products.values():
-            if (existing_product['name'] == data['name']
-               and existing_product['id'] == data['id']):
-                abort(400, message='Product already exists')
+        new_product = ProductModel(**existing_product)
 
-        name = data.get('name')
-        price = data.get('price')
-        product_id = str(uuid.uuid4())
-        product = { 'name': name, 'price': price, 'id': product_id }
+        try:
+            db.session.add(new_product)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            abort(500, message=str(e))
 
-        return jsonify({ 'id': product_id, **product }), 201
+        return jsonify(new_product), 201
 
 
 
