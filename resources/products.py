@@ -3,7 +3,7 @@ from flask import request, jsonify
 from flask_smorest import Blueprint, abort
 from db import db
 import uuid
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from schemas import ProductSchema, ProductUpdateSchema
 from models import ProductModel
 
@@ -67,6 +67,8 @@ class ProductList(MethodView):
         try:
             db.session.add(new_product)
             db.session.commit()
+        except IntegrityError as e:
+            abort(400, message=str(e))
         except SQLAlchemyError as e:
             abort(500, message=str(e))
 
