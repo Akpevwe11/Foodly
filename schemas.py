@@ -47,3 +47,10 @@ class ShopSchema(PlainShopSchema):
 class ProductSchema(PlainProductSchema):
     shop_id = fields.Str(required=True)
     shop = fields.Nested(PlainShopSchema(), dump_only=True)
+
+class UserSchema(Schema):
+    id = fields.Str(dump_only=True)
+    username = fields.Str(required=True)
+    password = fields.Str(required=True)
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
