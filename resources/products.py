@@ -1,6 +1,7 @@
 from flask.views import MethodView
 from flask import request, jsonify
 from flask_smorest import Blueprint, abort
+from flask_jwt_extended import jwt_required
 from db import db
 import uuid
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
@@ -14,6 +15,7 @@ blueprint = Blueprint('products', __name__, description='Products API')
 class Product(MethodView):
 
     @blueprint.response(200, 'Success')
+    @jwt_required()
     def get(self, product_id):
         """Get product by ID"""
         try:
@@ -27,6 +29,7 @@ class Product(MethodView):
 
     @blueprint.arguments(ProductSchema)
     @blueprint.response(201, 'Product successfully created')
+    @jwt_required()
     def post(self, product):
         """Create a new product"""
         new_product = ProductModel(**product)
@@ -41,6 +44,7 @@ class Product(MethodView):
 
     @blueprint.arguments(ProductUpdateSchema)
     @blueprint.response(200, 'Product successfully updated')
+    @jwt_required()
     def put(self, product_data, product_id):
         """Update a product"""
         try:
@@ -56,6 +60,7 @@ class Product(MethodView):
             abort(500, message=str(e))
 
     @blueprint.response(204, 'Product successfully deleted')
+    @jwt_required()
     def delete(self, product_id):
         """Delete a product"""
         try:
