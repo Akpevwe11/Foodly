@@ -5,6 +5,7 @@ from flask_jwt_extended import  JWTManager
 from resources.products import blueprint as products_blueprint
 from resources.orders import blueprint as orders_blueprint
 from resources.user import blueprint as users_blueprint
+from blacklist import BLACKLIST
 from db import db
 import models
 import os
@@ -25,6 +26,17 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
 
 jwt = JWTManager(app)
+
+@jwt.token_in_blocklist_loader
+def check_if_token_in_blocklist(jwt_header, jwt_payload):
+    return jwt_payload['jti'] in BLACKLIST
+
+@jwt.revoked_token_loader
+def revoked_token_callback(jwt_header, jwt_payload):
+    return jsonify({
+        'message': 'The token has been revoked',
+        'error': 'token revoked'
+    }), 401
 
 @jwt.expired_token_loader
 def expired_token_callback(jwt_header, jwt_payload):
