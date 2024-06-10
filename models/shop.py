@@ -13,5 +13,5 @@ class ShopModel(db.Model):
     def __repr__(self):
         return f'<ShopModel {self.name}>'
 
-ShopModel.query.get()
-ShopModel.query.get_or_404()
+#ShopModel.query.get()
+#ShopModel.query.get_or_404()

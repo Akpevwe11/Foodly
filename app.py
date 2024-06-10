@@ -2,9 +2,10 @@ from flask import Flask, jsonify
 from flask_smorest import Api
 from flask_jwt_extended import  JWTManager
 
+from resources.shops import blueprint as shops_blueprint
 from resources.products import blueprint as products_blueprint
-from resources.orders import blueprint as orders_blueprint
-from resources.user import blueprint as users_blueprint
+# from resources.orders import blueprint as orders_blueprint
+# from resources.user import blueprint as users_blueprint
 from blacklist import BLACKLIST
 from db import db
 import models
@@ -25,6 +26,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:/
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
 
+# Initialize the database after app is created
+db.init_app(app)
 jwt = JWTManager(app)
 
 @jwt.token_in_blocklist_loader
@@ -58,11 +61,21 @@ def missing_token_callback(error):
         'error': 'authorization required'
     }), 401
 
+@jwt.needs_fresh_token_loader
+def token_not_fresh_callback(jwt_header, jwt_payload):
+    return jsonify({
+        'message': 'The token is not fresh',
+        'error': 'fresh token required'
+    }), 401
 
 api = Api(app)
+
+with app.app_context():
+        db.create_all()
+
+api.register_blueprint(shops_blueprint)
 api.register_blueprint(products_blueprint)
-api.register_blueprint(orders_blueprint)
-api.register_blueprint(users_blueprint)
+
 
 
 
